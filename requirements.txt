@@ -1,0 +1,21 @@
+# RLI Systems Python Version - Dependencies
+
+# Flask веб-фреймворк
+Flask==3.0.0
+flask-cors==4.0.0
+
+# Production WSGI сервер
+gunicorn==21.2.0
+
+# Selenium для автоматизации браузера
+selenium==4.15.2
+
+# Парсинг HTML (beautifulsoup4 работает с html.parser без lxml)
+beautifulsoup4==4.12.2
+
+# Дополнительные утилиты
+python-dateutil==2.8.2
+
+# Веб-драйвер менеджер (автоматическая установка ChromeDriver)
+webdriver-manager==4.0.1
+

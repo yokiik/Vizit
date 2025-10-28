@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RLI Systems - Автоматизация терминала</title>
+  <link rel="stylesheet" href="./static/style.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>RLI Systems - Автоматизация терминала</h1>
+    <div class="status-bar">
+      <span id="connection-status" class="status disconnected">Отключено</span>
+      <span id="automation-status" class="status stopped">Остановлено</span>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="left-panel">
+      <div class="tabs">
+        <div class="tab-buttons">
+          <button class="tab-button active" data-tab="tasks">Задания</button>
+          <button class="tab-button" data-tab="settings">Настройки</button>
+          <button class="tab-button" data-tab="references">Справочники</button>
+        </div>
+
+        <div class="tab-content">
+          <!-- Вкладка Задания -->
+          <div id="tasks-tab" class="tab-panel active">
+            <div class="toolbar">
+              <button id="add-task-btn" class="btn btn-primary">Добавить задание</button>
+              
+              <div class="automation-controls">
+                <button id="start-automation-sequential-btn" class="btn btn-success">Запустить поочередно</button>
+                
+                <div class="parallel-controls">
+                  <button id="start-automation-parallel-btn" class="btn btn-success btn-parallel">Запустить параллельно</button>
+                  <input type="number" id="max-concurrency" class="concurrency-input" value="5" min="1" max="20" title="Количество одновременно выполняемых заданий">
+                </div>
+                
+                <button id="stop-automation-btn" class="btn btn-danger">Остановить автоматизацию</button>
+              </div>
+            </div>
+
+            <div class="tasks-container">
+              <table id="tasks-table" class="data-table">
+                <thead>
+                <tr>
+                  <th class="drag-handle-header">⋮⋮</th>
+                  <th>В работе</th>
+                  <th>Тип</th>
+                  <th>Статус</th>
+                  <th>Дата</th>
+                  <th>Слот</th>
+                  <th>Номер авто</th>
+                  <th>Водитель</th>
+                  <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Задания будут загружены через JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Вкладка Настройки -->
+          <div id="settings-tab" class="tab-panel">
+            <div class="settings-form">
+              <h3>Настройки подключения</h3>
+              <form id="settings-form">
+                <div class="form-group">
+                  <label for="site-url">URL сайта:</label>
+                  <input type="url" id="site-url" name="site_url" value="https://www.rlisystems.ru/conterra/" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="login">Логин:</label>
+                  <input type="text" id="login" name="login" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="password">Пароль:</label>
+                  <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-group checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="save-credentials" name="save_credentials">
+                    <span class="checkmark"></span>
+                    Сохранять логин и пароль
+                  </label>
+                  <small class="help-text">Данные будут сохранены локально для удобства</small>
+                </div>
+
+                <div class="form-group">
+                  <button type="button" id="test-connection-btn" class="btn btn-secondary">Проверить подключение</button>
+                </div>
+
+                <div class="form-group">
+                  <label for="refresh-interval">Интервал обновления (сек):</label>
+                  <input type="number" id="refresh-interval" name="refresh_interval" min="1" max="3600">
+                </div>
+
+
+
+                <h3>Дополнительные настройки</h3>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="execution-attempts">Количество попыток выполнить задание:</label>
+                    <input type="number" id="execution-attempts" name="default_execution_attempts" min="1" max="200" value="60">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="delay-try">Задержка между попытками (сек):</label>
+                    <input type="number" id="delay-try" name="default_delay_try" min="1" max="3600" value="60">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="element-timeout">Таймаут элементов (сек):</label>
+                    <input type="number" id="element-timeout" name="element_timeout" min="5" max="60" value="10">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="browser-width">Ширина браузера (для совместимости):</label>
+                    <input type="number" id="browser-width" name="browser_width" min="800" max="1920" value="1280">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="browser-height">Высота браузера (для совместимости):</label>
+                    <input type="number" id="browser-height" name="browser_height" min="600" max="1080" value="720">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="browser-path">Путь к браузеру (устаревший):</label>
+                  <input type="text" id="browser-path" name="browser_path" placeholder="Путь к исполняемому файлу браузера">
+                  <small class="help-text">Укажите путь к браузеру Chrome/Chromium для автоматизации</small>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Вкладка Справочники -->
+          <div id="references-tab" class="tab-panel">
+            <div class="references-container">
+              <div class="reference-type-tabs">
+                <button class="ref-tab-button active" data-ref="operations">Операции</button>
+                <button class="ref-tab-button" data-ref="statuses">Статусы</button>
+                <button class="ref-tab-button" data-ref="timeslots">Временные слоты</button>
+                <button class="ref-tab-button" data-ref="autos">Госномера</button>
+                <button class="ref-tab-button" data-ref="drivers">Водители</button>
+                <button class="ref-tab-button" data-ref="contracts">Договоры</button>
+              </div>
+
+              <div class="reference-content">
+                <div class="reference-toolbar">
+                  <button id="add-reference-btn" class="btn btn-primary">Добавить</button>
+                </div>
+
+                <div id="reference-list" class="reference-list">
+                  <!-- Элементы справочника будут загружены через JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-handle"></div>
+
+    <div class="right-panel">
+      <div class="logs-container">
+        <div class="logs-header">
+          <h3>Логи системы</h3>
+          <div class="logs-controls">
+            <select id="log-level-filter">
+              <option value="">Все уровни</option>
+              <option value="ERROR">Ошибки</option>
+              <option value="WARN">Предупреждения</option>
+              <option value="INFO">Информация</option>
+              <option value="DEBUG">Отладка</option>
+            </select>
+
+            <select id="log-category-filter">
+              <option value="">Все категории</option>
+              <option value="USER_ACTION">Действия пользователя</option>
+              <option value="TASK_EXECUTION">Выполнение заданий</option>
+              <option value="BROWSER_AUTOMATION">Автоматизация браузера</option>
+              <option value="SETTINGS">Настройки</option>
+              <option value="REFERENCES">Справочники</option>
+            </select>
+
+            <button id="clear-logs-btn" class="btn btn-small">Очистить</button>
+          </div>
+        </div>
+
+        <div id="logs-content" class="logs-content">
+          <!-- Логи будут загружены через JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальные окна -->
+<div id="task-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="task-modal-title">Добавить задание</h3>
+      <span class="close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="task-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-type">Тип операции:</label>
+            <select id="task-type" name="type_task" required>
+              <option value="">Выберите тип операции</option>
+              <!-- Опции будут загружены через JavaScript -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="task-status">Статус:</label>
+            <select id="task-status" name="status" required>
+              <option value="">Выберите статус</option>
+              <!-- Опции будут загружены через JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-date">Дата:</label>
+            <input type="date" id="task-date" name="date" required>
+          </div>
+
+          <div class="form-group">
+            <label for="task-time-slot">Временной слот:</label>
+            <select id="task-time-slot" name="time_slot" required>
+              <option value="">Выберите временной слот</option>
+              <!-- Опции будут загружены через JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-auto">Номер авто:</label>
+            <select id="task-auto" name="num_auto" required>
+              <option value="">Выберите номер авто</option>
+              <!-- Опции будут загружены через JavaScript -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="task-driver">Водитель:</label>
+            <select id="task-driver" name="driver" required>
+              <option value="">Выберите водителя</option>
+              <!-- Опции будут загружены через JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="task-place">Место доставки:</label>
+          <input type="text" id="task-place" name="place" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-index-container">Индекс контейнера:</label>
+            <input type="text" id="task-index-container" name="index_container">
+          </div>
+
+          <div class="form-group">
+            <label for="task-number-container">Номер контейнера:</label>
+            <input type="text" id="task-number-container" name="number_container">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-release-order">Распоряжение на выпуск:</label>
+            <input type="text" id="task-release-order" name="release_order">
+          </div>
+
+          <div class="form-group">
+            <label for="task-contract">Договор терминала:</label>
+            <input type="text" id="task-contract" name="contract_terminal">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="task-in-work" name="in_work">
+            Задание в работе
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для добавления записи в справочник -->
+<div id="reference-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="reference-modal-title">Добавить запись</h3>
+      <span class="close" onclick="closeReferenceModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="reference-form">
+        <div class="form-group">
+          <label for="reference-value">Значение *:</label>
+          <input type="text" id="reference-value" name="value" required placeholder="Введите значение">
+        </div>
+
+        <div class="form-group">
+          <label for="reference-description">Описание:</label>
+          <input type="text" id="reference-description" name="description" placeholder="Дополнительное описание (необязательно)">
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" onclick="closeReferenceModal()">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="./static/app.js"></script>
+
+
+</body>
+</html>

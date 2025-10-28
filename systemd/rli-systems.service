@@ -1,0 +1,43 @@
+[Unit]
+Description=RLI Systems Python Application
+Documentation=https://github.com/your-username/rlisystems_v1
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/apps/rlisystems_v1/python_version
+Environment="PATH=/var/www/apps/rlisystems_v1/python_version/venv/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="PORT=8088"
+
+# Команда запуска
+ExecStart=/var/www/apps/rlisystems_v1/python_version/venv/bin/gunicorn \
+    --config gunicorn_config.py \
+    --bind 127.0.0.1:8088 \
+    --pid /var/run/rli-systems.pid \
+    wsgi:application
+
+# Перезапуск при сбое
+Restart=always
+RestartSec=10
+StartLimitInterval=0
+
+# Лимиты ресурсов
+LimitNOFILE=65536
+MemoryLimit=2G
+
+# Security
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/apps/rlisystems_v1/python_version /var/run
+
+# Логи
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rli-systems
+
+[Install]
+WantedBy=multi-user.target
+
