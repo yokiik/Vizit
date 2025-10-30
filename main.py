@@ -13,8 +13,8 @@ from domain.log import LogEntry, LogLevel, LogCategory
 
 def main():
     """Главная функция"""
-    print("=== Автоматизация регистрации ввозы/вывоза контейнеров (rlisystems.ru) ===")
-    print("Python версия - Запуск веб-интерфейса...")
+    print("=== RLI Systems Python Version ===")
+    print("Starting web interface...")
     
     # Определяем директорию данных
     home_dir = Path.home()
@@ -34,7 +34,7 @@ def main():
         print("Хранилище данных находится в неисправном состоянии")
         sys.exit(1)
     
-    print("✓ Хранилище данных инициализировано")
+    print("[OK] Data storage initialized")
     
     # Создаем сервисы
     task_service = TaskService(
@@ -50,7 +50,7 @@ def main():
         task_service
     )
     
-    print("✓ Бизнес-сервисы созданы")
+    print("[OK] Business services created")
     
     # Создаем веб-сервер
     web_server = create_web_server(task_service, automation_service, data_manager)
@@ -86,11 +86,16 @@ def main():
     )
     data_manager.get_logs().save(startup_log)
     
-    # Запускаем веб-сервер
+    # Запускаем веб-сервер через Uvicorn
     try:
-        web_server.start(port)
+        import uvicorn
+        print(f"[INFO] Starting server on port {port}")
+        print(f"[INFO] Open browser: http://localhost:{port}")
+        print(f"[INFO] Swagger docs: http://localhost:{port}/docs")
+        print("Press Ctrl+C to stop")
+        uvicorn.run(web_server.app, host="0.0.0.0", port=port, log_level="info")
     except Exception as e:
-        print(f"Ошибка запуска веб-сервера: {e}")
+        print(f"[ERROR] Server startup error: {e}")
         sys.exit(1)
 
 

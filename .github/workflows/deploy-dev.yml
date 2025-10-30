@@ -1,0 +1,53 @@
+name: Deploy to Development Server
+
+on:
+  push:
+    branches:
+      - dev
+      - develop
+
+jobs:
+  deploy-dev:
+    name: Deploy to Development Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get commit information
+        id: commit
+        run: |
+          echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+          echo "commit_short=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+      
+      - name: Display commit info
+        run: |
+          echo "🧪 Деплой RLI Systems (Development)"
+          echo "Коммит: ${{ steps.commit.outputs.commit_short }}"
+          echo "Автор: ${{ steps.commit.outputs.commit_author }}"
+          echo "Сообщение: ${{ steps.commit.outputs.commit_message }}"
+      
+      - name: Deploy to development server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VDS_HOST }}
+          username: ${{ secrets.VDS_USERNAME }}
+          key: ${{ secrets.VDS_SSH_KEY }}
+          script: |
+            cd /var/www/apps/rlisystems_v1/python_version-dev
+            bash update.sh
+            sudo systemctl restart rli-systems-dev.service
+      
+      - name: Deployment success
+        if: success()
+        run: |
+          echo "✅ Деплой в Development успешно завершен!"
+          echo "Окружение: DEVELOPMENT"
+          echo "Ветка: ${{ github.ref_name }}"
+          echo "Коммит: ${{ steps.commit.outputs.commit_short }}"
+

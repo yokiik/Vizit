@@ -1,23 +1,24 @@
 """
-WSGI точка входа для Gunicorn
+ASGI точка входа для Uvicorn
 """
 
 import sys
+import os
 from pathlib import Path
 
 # Добавляем текущую директорию в PYTHONPATH
 sys.path.insert(0, str(Path(__file__).parent))
 
-from main import create_web_server
+from web.server import create_web_server
 from repository.json_repository import JSONDataManager
 from service.task_service import TaskService
 from service.automation_service import AutomationService
 from domain.log import LogEntry, LogLevel, LogCategory
 
 def create_app():
-    """Создает WSGI приложение для Gunicorn"""
+    """Создает FastAPI приложение для Uvicorn"""
     
-    print("🔧 Инициализация RLI Systems...")
+    print("[INFO] Initializing RLI Systems...")
     
     # Определяем директорию данных
     home_dir = Path.home()
@@ -28,9 +29,9 @@ def create_app():
     data_manager.initialize()
     
     if not data_manager.is_healthy():
-        raise RuntimeError("Хранилище данных находится в неисправном состоянии")
+        raise RuntimeError("Data storage is unhealthy")
     
-    print("✓ Хранилище данных инициализировано")
+    print("[OK] Data storage initialized")
     
     # Создаем сервисы
     task_service = TaskService(
@@ -46,7 +47,7 @@ def create_app():
         task_service
     )
     
-    print("✓ Бизнес-сервисы созданы")
+    print("[OK] Business services created")
     
     # Создаем веб-сервер
     web_server = create_web_server(task_service, automation_service, data_manager)
@@ -55,20 +56,20 @@ def create_app():
     startup_log = LogEntry(
         level=LogLevel.INFO,
         category=LogCategory.SYSTEM,
-        message="Веб-приложение запущено через Gunicorn"
+        message="Web application started via Uvicorn"
     )
     data_manager.get_logs().save(startup_log)
     
-    print("✓ Веб-сервер готов")
+    print("[OK] Web server ready")
     
     return web_server.app
 
-# Gunicorn ожидает переменную 'application'
+# Uvicorn ожидает переменную 'application'
 application = create_app()
 
 # Для запуска в режиме разработки
 if __name__ == "__main__":
-    from werkzeug.serving import run_simple
-    app = create_app()
-    run_simple('0.0.0.0', 8088, app, use_reloader=True)
+    import uvicorn
+    port = int(os.getenv('PORT', 8088))
+    uvicorn.run("wsgi:application", host="0.0.0.0", port=port, reload=False)
 

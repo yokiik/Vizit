@@ -1,5 +1,5 @@
 [Unit]
-Description=RLI Systems Python Application
+Description=RLI Systems Python Application (Development)
 Documentation=https://github.com/your-username/rlisystems_v1
 After=network.target
 
@@ -7,17 +7,17 @@ After=network.target
 Type=notify
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/apps/rlisystems_v1/python_version
-Environment="PATH=/var/www/apps/rlisystems_v1/python_version/venv/bin"
+WorkingDirectory=/var/www/apps/rlisystems_v1/python_version-dev
+Environment="PATH=/var/www/apps/rlisystems_v1/python_version-dev/venv/bin"
 Environment="PYTHONUNBUFFERED=1"
-Environment="PORT=8088"
+Environment="PORT=8089"
 
 # Команда запуска через Uvicorn
-ExecStart=/var/www/apps/rlisystems_v1/python_version/venv/bin/uvicorn \
+ExecStart=/var/www/apps/rlisystems_v1/python_version-dev/venv/bin/uvicorn \
     --host 127.0.0.1 \
-    --port 8088 \
-    --workers 4 \
-    --log-level info \
+    --port 8089 \
+    --workers 2 \
+    --log-level debug \
     wsgi:application
 
 # Перезапуск при сбое
@@ -27,17 +27,17 @@ StartLimitInterval=0
 
 # Лимиты ресурсов
 LimitNOFILE=65536
-MemoryLimit=2G
+MemoryLimit=1G
 
 # Security
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/var/www/apps/rlisystems_v1/python_version /var/run
+ReadWritePaths=/var/www/apps/rlisystems_v1/python_version-dev /var/run
 
 # Логи
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=rli-systems
+SyslogIdentifier=rli-systems-dev
 
 [Install]
 WantedBy=multi-user.target

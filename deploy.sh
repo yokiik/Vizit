@@ -102,11 +102,10 @@ pip install -q -r requirements.txt || {
 }
 echo -e "${GREEN}✓ Зависимости обновлены${NC}"
 
-# Устанавливаем gunicorn если его нет
-echo -e "${YELLOW}📦 Проверяем gunicorn...${NC}"
-pip install -q gunicorn || {
-    echo -e "${RED}❌ Ошибка установки gunicorn${NC}"
-    exit 1
+# Проверяем, что uvicorn установлен (должен быть в requirements.txt)
+echo -e "${YELLOW}📦 Проверяем uvicorn...${NC}"
+pip show uvicorn >/dev/null 2>&1 || {
+    echo -e "${YELLOW}⚠️  Uvicorn не установлен, будет установлен из requirements.txt${NC}"
 }
 
 # Перезапускаем приложение (только если используется systemd)

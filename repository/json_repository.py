@@ -383,7 +383,7 @@ class JSONDataManager(DataManager):
         self.references_repo.initialize()
         self.logs_repo.initialize()
         
-        print(f"✓ Хранилище данных инициализировано: {self.data_dir}")
+        print(f"[OK] Data storage initialized: {self.data_dir}")
     
     def get_tasks(self) -> TaskRepository:
         """Возвращает репозиторий заданий"""
@@ -434,12 +434,12 @@ class JSONDataManager(DataManager):
                 dst = os.path.join(backup_dir, filename)
                 shutil.copy2(src, dst)
         
-        print(f"✓ Резервная копия создана: {backup_dir}")
+        print(f"[OK] Backup created: {backup_dir}")
     
     def restore(self, backup_path: str) -> None:
         """Восстанавливает из резервной копии"""
         if not os.path.exists(backup_path):
-            raise FileNotFoundError(f"Директория резервной копии не существует: {backup_path}")
+            raise FileNotFoundError(f"Backup directory not found: {backup_path}")
         
         # Копируем все JSON файлы обратно
         for filename in os.listdir(backup_path):
@@ -448,5 +448,5 @@ class JSONDataManager(DataManager):
                 dst = os.path.join(self.data_dir, filename)
                 shutil.copy2(src, dst)
         
-        print(f"✓ Данные восстановлены из: {backup_path}")
+        print(f"[OK] Data restored from: {backup_path}")
 
