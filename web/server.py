@@ -21,7 +21,8 @@ from .schemas import (
     LogEntryResponse,
     AutomationStartRequest, AutomationResponse,
     ConnectionTestRequest, ConnectionTestResponse,
-    SuccessResponse, ErrorResponse
+    SuccessResponse, ErrorResponse,
+    LoginRequest, LoginResponse
 )
 
 
@@ -89,6 +90,57 @@ class WebServer:
                 return HTMLResponse(content=template.render())
             else:
                 return HTMLResponse(content="<h1>RLI Systems</h1><p>Template not found</p>")
+        
+        # API авторизации
+        @self.app.post("/auth/login", response_model=LoginResponse)
+        async def auth_login(request: LoginRequest):
+            """Авторизация пользователя"""
+            try:
+                # Получаем логин (поддержка username или login)
+                username = request.username or request.login
+                password = request.password
+                
+                if not username or not password:
+                    return LoginResponse(
+                        success=False,
+                        message="Username and password required"
+                    )
+                
+                # Получаем настройки системы для проверки учетных данных
+                settings = self.data_manager.get_settings().get()
+                
+                # Проверяем учетные данные
+                if username == settings.login and password == settings.password:
+                    # Логируем успешную авторизацию
+                    log_entry = create_user_action_log(
+                        "Успешная авторизация",
+                        f"Пользователь: {username}"
+                    )
+                    self.data_manager.get_logs().save(log_entry)
+                    
+                    return LoginResponse(
+                        success=True,
+                        message="Login successful",
+                        token="bearer-token-placeholder",
+                        user={
+                            "username": username,
+                            "role": "admin"
+                        }
+                    )
+                else:
+                    # Логируем неудачную попытку
+                    log_entry = create_user_action_log(
+                        "Неудачная попытка авторизации",
+                        f"Пользователь: {username}"
+                    )
+                    self.data_manager.get_logs().save(log_entry)
+                    
+                    return LoginResponse(
+                        success=False,
+                        message="Invalid credentials"
+                    )
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
         
         # API заданий
         @self.app.get("/api/tasks", response_model=List[TaskResponse])

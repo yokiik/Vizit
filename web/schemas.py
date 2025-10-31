@@ -215,3 +215,18 @@ class ErrorResponse(BaseModel):
     """Модель ошибки"""
     error: str
 
+
+# Модели для авторизации
+class LoginRequest(BaseModel):
+    """Модель запроса авторизации"""
+    username: Optional[str] = Field(None, description="Имя пользователя")
+    login: Optional[str] = Field(None, description="Логин")
+    password: str = Field(..., description="Пароль")
+
+
+class LoginResponse(BaseModel):
+    """Модель ответа авторизации"""
+    success: bool
+    message: str
+    token: Optional[str] = None
+    user: Optional[dict] = None
