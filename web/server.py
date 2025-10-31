@@ -106,11 +106,8 @@ class WebServer:
                         message="Username and password required"
                     )
                 
-                # Получаем настройки системы для проверки учетных данных
-                settings = self.data_manager.get_settings().get()
-                
-                # Проверяем учетные данные
-                if username == settings.login and password == settings.password:
+                # Проверяем: логин и пароль должны быть "admin"
+                if username == "admin" and password == "admin":
                     # Логируем успешную авторизацию
                     log_entry = create_user_action_log(
                         "Успешная авторизация",
