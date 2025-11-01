@@ -93,7 +93,7 @@ class WebServer:
         
         # API авторизации
         @self.app.post("/auth/login", response_model=LoginResponse)
-        async def auth_login(request: LoginRequest):
+        async def auth_login(request: LoginRequest, response: Response):
             """Авторизация пользователя"""
             try:
                 # Получаем логин (поддержка username или login)
@@ -101,6 +101,7 @@ class WebServer:
                 password = request.password
                 
                 if not username or not password:
+                    response.status_code = 400
                     return LoginResponse(
                         success=False,
                         message="Username and password required"
@@ -115,6 +116,7 @@ class WebServer:
                     )
                     self.data_manager.get_logs().save(log_entry)
                     
+                    response.status_code = 200
                     return LoginResponse(
                         success=True,
                         message="Login successful",
@@ -132,6 +134,7 @@ class WebServer:
                     )
                     self.data_manager.get_logs().save(log_entry)
                     
+                    response.status_code = 401
                     return LoginResponse(
                         success=False,
                         message="Invalid credentials"
